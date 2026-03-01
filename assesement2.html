@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title></title>
+</head>
+<body>
+
+<h2>Recipes Table</h2>
+
+<table border="1">
+  <thead>
+    <tr>
+      <th>Name</th>
+
+      <th onclick="sortData('caloriesPerServing', this)">
+        Calories <span></span>
+      </th>
+
+      <th onclick="sortData('rating', this)">
+        Rating <span></span>
+      </th>
+
+      <th onclick="sortData('prepTimeMinutes', this)">
+        Cooking Start Time <span></span>
+      </th>
+
+      <th onclick="sortData('cookTimeMinutes', this)">
+        Cooking End Time <span></span>
+      </th>
+    </tr>
+  </thead>
+  <tbody id="data"></tbody>
+</table>
+
+<br>
+
+<button id="prevBtn" onclick="prevPage()">Previous</button>
+<button id="nextBtn" onclick="nextPage()">Next</button>
+
+<script>
+let recipes = []
+let order = true
+let currentPage = 1
+let itemsPerPage = 10
+let lastSortedSpan = null
+
+fetch("https://dummyjson.com/recipes")
+  .then(res => res.json())
+  .then(result => {
+    recipes = result.recipes
+    displayData()
+    updateButtons()
+  })
+
+
+function displayData() {
+  let tbody = document.getElementById("data")
+  tbody.innerHTML = ""
+
+  let start = (currentPage - 1) * itemsPerPage
+  let end = start + itemsPerPage
+  let pageData = recipes.slice(start, end)
+
+  pageData.forEach(item => {
+    let row = document.createElement("tr")
+
+    row.innerHTML = `
+      <td>${item.name}</td>
+      <td>${item.caloriesPerServing}</td>
+      <td>${item.rating}</td>
+      <td>${item.prepTimeMinutes}</td>
+      <td>${item.cookTimeMinutes}</td>
+    `
+
+    tbody.appendChild(row)
+  })
+}
+
+
+function sortData(key, th) {
+
+  let span = th.querySelector("span")
+
+
+  if(lastSortedSpan && lastSortedSpan !== span){
+    lastSortedSpan.innerHTML = ""
+  }
+
+  if(order){
+    recipes.sort((a, b) => a[key] - b[key])
+    span.innerHTML = "&#8595 "
+  } else {
+    recipes.sort((a, b) => b[key] - a[key])
+    span.innerHTML = "&#8593 "
+  }
+
+  order = !order
+  lastSortedSpan = span
+  currentPage = 1
+  displayData()
+  updateButtons()
+}
+
+
+function nextPage() {
+  currentPage++
+  displayData()
+  updateButtons()
+}
+
+function prevPage() {
+  currentPage--
+  displayData()
+  updateButtons()
+}
+
+
+function updateButtons() {
+  let prevBtn = document.getElementById("prevBtn")
+  let nextBtn = document.getElementById("nextBtn")
+
+  let totalPages = Math.ceil(recipes.length / itemsPerPage)
+
+  if(currentPage <= 1){
+    prevBtn.style.display = "none"
+  } else {
+    prevBtn.style.display = "inline"
+  }
+
+  if(currentPage >= totalPages){
+    nextBtn.style.display = "none"
+  } else {
+    nextBtn.style.display = "inline"
+  }
+}
+</script>
+
+</body>
+</html>
