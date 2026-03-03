@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+<style>
+body {
+font-family: Arial, sans-serif;
+margin: 0;
+background: linear-gradient(to right, #25d366, #128c7e);
+}
+
+.container {
+    width: 420px;
+    height: 600px;
+    margin: 40px auto;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    display: flex;
+    flex-direction: column;
+    background: white;
+}
+.header {
+    background: #075e54;
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    }
+.dots {
+    cursor: pointer;
+    font-size: 20px;
+}
+.menu {
+    position: absolute;
+    top: 50px;
+    right: 10px;
+    background: rgb(36, 35, 35);
+    border-radius: 5px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.3);
+    padding: 5px 0;
+    width: 120px;
+    z-index: 120px; 
+}
+.menu div {
+    padding: 8px;
+    cursor: pointer;
+}
+.menu div:hover {
+background: #292525;
+}
+.chatBox {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+}
+.message {
+    margin: 10px 0;
+    max-width: 70%;
+    padding: 12px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    line-height: 1.4;
+    word-wrap: break-word;
+    animation: fadeIn 0.3s ease-in-out;
+}
+.sent {
+    margin-left: auto;
+    border-bottom-right-radius: 5px;
+}
+.received {
+    margin-right: auto;
+    border-bottom-left-radius: 5px;
+}
+.inputArea {
+    display: flex;
+    padding: 12px;
+    background: #f0f0f0;
+    border-top: 1px solid #ddd;
+}
+
+.inputArea input {
+    flex: 1;
+    padding: 12px;
+    border-radius: 25px;
+    border: 1px solid #ccc;
+    outline: none;
+    font-size: 14px;
+}
+
+.inputArea button {
+    margin-left: 10px;
+    padding: 12px 18px;
+    border-radius: 25px;
+    border: none;
+    background: #075e54;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.inputArea button:hover {
+    background: #0b7d6b;
+    transform: scale(1.05);
+}
+.light {
+    background: #ece5dd;
+    color: black;
+}
+.light .sent {
+    background: #dcf8c6;
+}
+.light .received {
+    background: white;
+}
+
+.dark {
+    background: #121212;
+    color: white;
+}
+.dark .sent {
+    background: #005c4b;
+    color: white;
+}
+.dark .received {
+    background: #2a2a2a;
+    color: white;
+}
+.dark .inputArea {
+    background: #1e1e1e;
+}
+.dark input {
+    background: #2a2a2a;
+    color: white;
+    border: 1px solid #444;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+class App extends React.Component {
+
+    constructor() {
+    super();
+    this.state = {
+    message: "",
+    chat: [],
+    showMenu: false,
+    mode: "light"
+    };
+    }
+
+    handleChange = (e) => {
+    this.setState({ message: e.target.value });
+    };
+
+    sendMessage = () => {
+    if (this.state.message.trim() === "") return;
+
+    this.setState({
+    chat: [...this.state.chat, { text: this.state.message, type: "sent" }],
+    message: ""
+    });
+
+    setTimeout(() => {
+    this.setState(prevState => ({
+        chat: [...prevState.chat, { text: "Reply Message ✔", type: "received" }]
+    }));
+    }, 500);
+    };
+
+    toggleMenu = () => {
+    this.setState({ showMenu: !this.state.showMenu });
+    };
+
+    setMode = (selectedMode) => {
+    this.setState({
+    mode: selectedMode,
+    showMenu: false
+    });
+    };
+
+    render() {
+    return (
+    <div className="container">
+
+        <div className="header">
+        Chat
+        <div className="dots" onClick={this.toggleMenu}>⋮</div>
+
+        {this.state.showMenu &&
+            <div className="menu">
+            <div onClick={() => this.setMode("dark")}>Dark Mode</div>
+            <div onClick={() => this.setMode("light")}>Light Mode</div>
+            </div>
+        }
+        </div>
+
+        <div className={"chatBox " + this.state.mode}>
+
+        {this.state.chat.length === 0 &&
+            <p style={{textAlign:"center"}}>Start Conversation...</p>
+        }
+
+        {this.state.chat.map((msg, index) => (
+            <div
+            key={index}
+            className={
+                "message " +
+                (msg.type === "sent" ? "sent" : "received")
+            }
+            >
+            {msg.text}
+            </div>
+        ))}
+
+        </div>
+
+        <div className="inputArea">
+        <input
+            type="text"
+            value={this.state.message}
+            onChange={this.handleChange}
+            placeholder="Type message..."
+        />
+        <button onClick={this.sendMessage}>Send</button>
+        </div>
+
+    </div>
+    );
+}
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+
+</script>
+
+</body>
+</html>
